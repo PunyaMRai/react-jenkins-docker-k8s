@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  flask-app:
+    image: python:3.8-slim
+    container_name: flask-app
+    ports:
+      - "5000:5000"
+
+  node-app:
+    image: node:14
+    container_name: node-app
+    ports:
+      - "3000:3000"
+
+  mysql-db:
+    image: mysql:8
+    container_name: mysql-db
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: appdb
+      MYSQL_USER: user
+      MYSQL_PASSWORD: userpassword
