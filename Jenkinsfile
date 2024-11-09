@@ -1,19 +1,36 @@
 pipeline {
     agent any
+    environment {
+        DOCKER_HUB_CREDENTIALS = credentials('dockerhub-credentials')
+        DOCKER_IMAGE = "pun12/react-jenkins-docker-k8s"
+    }
     stages {
-        stage('Build Docker Image') {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/PunyaMRai/react-jenkins-docker-k8s.git'
+            }
+        }
+        stage('Build') {
             steps {
                 script {
-                    docker.build('my-image-name')
+                    docker.build(DOCKER_IMAGE)
                 }
             }
         }
-        stage('Push Docker Image') {
+        stage('Push to Docker Hub') {
             steps {
                 script {
-                    docker.withRegistry('https://hub.docker.com', 'docker-credentials') {
-                        docker.image('my-image-name').push()
+                    docker.withRegistry('https://index.docker.io/v1/', 'DOCKER_HUB_CREDENTIALS') {
+                        docker.image(DOCKER_IMAGE).push("latest")
                     }
+                }
+            }
+        }
+        stage('Deploy to Kubernetes') {
+            steps {
+                script {
+                    sh "kubectl apply -f k8s-deployment.yaml"
+                    sh "kubectl apply -f k8s-service.yaml"
                 }
             }
         }
